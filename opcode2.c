@@ -4,7 +4,7 @@
  * push - Pushes an element to the stack.
  * @stack: Double pointer to the head of the stack.
  * @value: The value to be pushed.
-**/
+ */
 void push(stack_t **stack, int value)
 {
 	stack_t *new_node = create_node(value);
@@ -24,7 +24,7 @@ void push(stack_t **stack, int value)
  * @value: The value to be stored in the node.
  *
  * Return: A pointer to the newly created node, or NULL on failure.
-**/
+ */
 stack_t *create_node(int value)
 {
 	stack_t *new_node = malloc(sizeof(stack_t));
@@ -37,6 +37,8 @@ stack_t *create_node(int value)
 
 	return (new_node);
 }
+
+
 
 /**
  * pall - Prints all the values on the stack, starting from the top.
@@ -106,3 +108,4 @@ void swap(stack_t **stack)
 	(*stack)->n = (*stack)->next->n;
 	(*stack)->next->n = temp;
 }
+
