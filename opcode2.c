@@ -38,3 +38,71 @@ stack_t *create_node(int value)
 	return (new_node);
 }
 
+/**
+ * pall - Prints all the values on the stack, starting from the top.
+ * @stack: Double pointer to the head of the stack.
+ */
+void pall(stack_t **stack)
+{
+	stack_t *current = *stack;
+
+	while (current != NULL)
+	{
+		printf("%d\n", current->n);
+		current = current->next;
+	}
+}
+
+/**
+ * pint - Prints the value at the top of the stack.
+ * @stack: Double pointer to the head of the stack.
+ */
+void pint(stack_t **stack)
+{
+	if (*stack == NULL)
+	{
+		fprintf(stderr, "L%d: can't pint, stack empty\n", line_number);
+		exit(EXIT_FAILURE);
+	}
+
+	printf("%d\n", (*stack)->n);
+}
+
+/**
+ * pop - Removes the top element of the stack.
+ * @stack: Double pointer to the head of the stack.
+ */
+void pop(stack_t **stack)
+{
+	stack_t *temp;
+
+	if (*stack == NULL)
+	{
+		fprintf(stderr, "L%d: can't pop an empty stack\n", line_number);
+		exit(EXIT_FAILURE);
+	}
+
+	temp = *stack;
+	*stack = (*stack)->next;
+
+	free(temp);
+}
+
+/**
+ * swap - Swaps the top two elements of the stack.
+ * @stack: Double pointer to the head of the stack.
+ */
+void swap(stack_t **stack)
+{
+	int temp;
+
+	if (*stack == NULL || (*stack)->next == NULL)
+	{
+		fprintf(stderr, "L%d: can't swap, stack too short\n", line_number);
+		exit(EXIT_FAILURE);
+	}
+
+	temp = (*stack)->n;
+	(*stack)->n = (*stack)->next->n;
+	(*stack)->next->n = temp;
+}
