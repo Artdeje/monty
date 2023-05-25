@@ -1,50 +1,40 @@
 #include "monty.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-bus_t bus = {NULL, NULL, NULL, 0};
 
 /**
-* main - function for monty code interpreter.
-* @argc: argument count.
-* @argv: argument value.
-* Return: 0 on success.
+ * push - Pushes an element to the stack.
+ * @stack: Double pointer to the head of the stack.
+ * @value: The value to be pushed.
 **/
-
-int main(int argc, char *argv[])
+void push(stack_t **stack, int value)
 {
-        char *content;
-        FILE *file;
-        size_t size = 0;
-        ssize_t read_line = 1;
-        stack_t *stack = NULL;
-        unsigned int counter = 0;
+	stack_t *new_node = create_node(value);
 
-	if (argc != 2)
+	if (new_node == NULL)
 	{
-		fprintf(stderr, "USAGE: monty file\n");
+		fprintf(stderr, "Error: malloc failed\n");
 		exit(EXIT_FAILURE);
 	}
-	file = fopen(argv[1], "r");
-	bus.file = file;
-	if (!file)
-	{
-		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-		exit(EXIT_FAILURE);
-	}
-	while (read_line > 0)
-	{
-		content = NULL;
-		read_line = getline(&content, &size, file);
-		bus.content = content;
-		counter++;
-		if (read_line > 0)
-		{
-			execute(content, &stack, counter, file);
-		}
-		free(content);
-	}
-	free_stack(stack);
-	fclose(file);
-return (0);
+
+	new_node->next = *stack;
+	*stack = new_node;
 }
+
+/**
+ * create_node - Creates a new node for the stack.
+ * @value: The value to be stored in the node.
+ *
+ * Return: A pointer to the newly created node, or NULL on failure.
+**/
+stack_t *create_node(int value)
+{
+	stack_t *new_node = malloc(sizeof(stack_t));
+
+	if (new_node == NULL)
+		return (NULL);
+
+	new_node->n = value;
+	new_node->next = NULL;
+
+	return (new_node);
+}
+
