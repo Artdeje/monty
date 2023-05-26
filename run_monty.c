@@ -1,86 +1,170 @@
 #include "monty.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
+ssize_t getline(char **lineptr, size_t *n, FILE *stream);
+void free_tokens(void);
+unsigned int token_arr_len(void);
+int is_empty_line(char *line, char *delims);
+void (*get_op_func(char *opcode))(stack_t**, unsigned int);
+int run_monty(FILE *script_fd);
+
 /**
- * main - Entry point of the Monty interpreter.
- * @argc: The number of command-line arguments.
- * @argv: An array of command-line arguments.
- *
- * Return: Always 0.
+ * free_tokens - Frees the global op_toks array of strings.
  */
-int main(int argc, char *argv[])
+void free_tokens(void)
 {
-	FILE *file;
-	char *line = NULL;
-	size_t line_len = 0;
+	size_t i = 0;
+
+	if (op_toks == NULL)
+		return;
+
+	for (i = 0; op_toks[i]; i++)
+		free(op_toks[i]);
+
+	free(op_toks);
+}
+
+/**
+ * token_arr_len - Gets the length of current op_toks.
+ *
+ * Return: Length of current op_toks (as int).
+ */
+unsigned int token_arr_len(void)
+{
+	unsigned int toks_len = 0;
+
+	while (op_toks[toks_len])
+		toks_len++;
+	return (toks_len);
+}
+
+/**
+ * is_empty_line - Checks if a line read from getline only contains delimiters.
+ * @line: A pointer to the line.
+ * @delims: A string of delimiter characters.
+ *
+ * Return: If the line only contains delimiters - 1.
+ *         Otherwise - 0.
+ */
+int is_empty_line(char *line, char *delims)
+{
+	int i, j;
+
+	for (i = 0; line[i]; i++)
+	{
+		for (j = 0; delims[j]; j++)
+		{
+			if (line[i] == delims[j])
+				break;
+		}
+		if (delims[j] == '\0')
+			return (0);
+	}
+
+	return (1);
+}
+
+/**
+ * get_op_func - Matches an opcode with its corresponding function.
+ * @opcode: The opcode to match.
+ *
+ * Return: A pointer to the corresponding function.
+ */
+void (*get_op_func(char *opcode))(stack_t**, unsigned int)
+{
+	instruction_t op_funcs[] = {
+		{"push", monty_push},
+		{"pall", monty_pall},
+		{"pint", monty_pint},
+		{"pop", monty_pop},
+		{"swap", monty_swap},
+		{"add", monty_add},
+		{"nop", monty_nop},
+		{"sub", monty_sub},
+		{"div", monty_div},
+		{"mul", monty_mul},
+		{"mod", monty_mod},
+		{"pchar", monty_pchar},
+		{"pstr", monty_pstr},
+		{"rotl", monty_rotl},
+		{"rotr", monty_rotr},
+		{"stack", monty_stack},
+		{"queue", monty_queue},
+		{NULL, NULL}
+	};
+	int i;
+
+	for (i = 0; op_funcs[i].opcode; i++)
+	{
+		if (strcmp(opcode, op_funcs[i].opcode) == 0)
+			return (op_funcs[i].f);
+	}
+
+	return (NULL);
+}
+
+/**
+ * run_monty - Primary function to execute a Monty bytecodes script.
+ * @script_fd: File descriptor for an open Monty bytecodes script.
+ *
+ * Return: EXIT_SUCCESS on success, respective error code on failure.
+ */
+int run_monty(FILE *script_fd)
+{
 	stack_t *stack = NULL;
-	unsigned int line_number = 0;
+	char *line = NULL;
+	size_t len = 0, exit_status = EXIT_SUCCESS;
+	unsigned int line_number = 0, prev_tok_len = 0;
+	void (*op_func)(stack_t**, unsigned int);
 
-	if (argc != 2)
-	{
-		fprintf(stderr, "Usage: monty file\n");
-		exit(EXIT_FAILURE);
-	}
+	if (init_stack(&stack) == EXIT_FAILURE)
+		return (EXIT_FAILURE);
 
-	file = fopen(argv[1], "r");
-	if (file == NULL)
-	{
-		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
-		exit(EXIT_FAILURE);
-	}
-
-	while (getline(&line, &line_len, file) != -1)
+	while (getline(&line, &len, script_fd) != -1)
 	{
 		line_number++;
-		data = strtok(line, " \t\n");
-
-		if (data != NULL && strcmp(data, "push") == 0)
+		op_toks = strtow(line, DELIMS);
+		if (op_toks == NULL)
 		{
-			data = strtok(NULL, " \t\n");
-			if (!is_integer(data))
-			{
-				fprintf(stderr, "L%u: usage: push integer\n", line_number);
-				free_stack(stack);
-				free(line);
-				fclose(file);
-				exit(EXIT_FAILURE);
-			}
-			push(&stack, atoi(data));
+			if (is_empty_line(line, DELIMS))
+				continue;
+			free_stack(&stack);
+			return (malloc_error());
 		}
-		else if (data != NULL)
+		else if (op_toks[0][0] == '#') /* comment line */
 		{
-			if (strcmp(data, "stack") == 0)
-				stack_mode(&stack);
-			else if (strcmp(data, "queue") == 0)
-				queue_mode(&stack);
-			else if (strcmp(data, "pop") == 0)
-				pop(&stack, line_number);
-			else if (strcmp(data, "pall") == 0)
-				pall(stack);
-			else if (strcmp(data, "pint") == 0)
-				pint(stack, line_number);
-			else if (strcmp(data, "swap") == 0)
-				swap(&stack, line_number);
-			else if (strcmp(data, "add") == 0)
-				add(&stack, line_number);
-			else if (strcmp(data, "nop") == 0)
-				nop(&stack, line_number);
+			free_tokens();
+			continue;
+		}
+		op_func = get_op_func(op_toks[0]);
+		if (op_func == NULL)
+		{
+			free_stack(&stack);
+			exit_status = unknown_op_error(op_toks[0], line_number);
+			free_tokens();
+			break;
+		}
+		prev_tok_len = token_arr_len();
+		op_func(&stack, line_number);
+		if (token_arr_len() != prev_tok_len)
+		{
+			if (op_toks && op_toks[prev_tok_len])
+				exit_status = atoi(op_toks[prev_tok_len]);
 			else
-			{
-				fprintf(stderr, "L%u: unknown instruction %s\n", line_number, data);
-				free_stack(stack);
-				free(line);
-				fclose(file);
-				exit(EXIT_FAILURE);
-			}
+				exit_status = EXIT_FAILURE;
+			free_tokens();
+			break;
 		}
+		free_tokens();
+	}
+	free_stack(&stack);
+
+	if (line && *line == 0)
+	{
+		free(line);
+		return (malloc_error());
 	}
 
-	free_stack(stack);
 	free(line);
-	fclose(file);
-
-	return (0);
+	return (exit_status);
 }

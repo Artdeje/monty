@@ -65,7 +65,7 @@ int is_integer(char *str)
  * free_stack - Frees a stack.
  * @stack: The stack to free.
  */
-void free_stack(stack_t *stack)
+void free_stack_t(stack_t *stack)
 {
 	stack_t *temp;
 
