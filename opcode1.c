@@ -46,7 +46,7 @@ void sub(stack_t **stack)
  * div - Divides the second top element of the stack by the top element.
  * @stack: Double pointer to the head of the stack.
  */
-void div(stack_t **stack)
+void divide(stack_t **stack)
 {
 	stack_t *temp;
 
