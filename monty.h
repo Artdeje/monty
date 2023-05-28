@@ -43,7 +43,7 @@ typedef struct instruction_s
 } instruction_t;
 
 /* PRIMARY INTERPRETER FUNCTIONS */
-void free_stack_t(stack_t **stack);
+void free_stack_t(stack_t *stack);
 int init_stack(stack_t **stack);
 int check_mode(stack_t *stack);
 void free_tokens(void);
