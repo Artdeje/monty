@@ -1,8 +1,18 @@
 #include "monty.h"
 
-/* Global variables */
-char *data = NULL;
-int mode = STACK_MODE;
+/**
+ * op_tok - array of operations
+ */
+char *op_toks[] = {
+  "push",
+  "pall",
+  "swap",
+  "add",
+  "nop",
+  "sub",
+  "div",
+  "mod",
+};
 
 /**
  * stack_mode - Sets the mode to stack (LIFO).
@@ -11,7 +21,6 @@ int mode = STACK_MODE;
 void stack_mode(stack_t **stack)
 {
 	(void)stack;
-	mode = STACK_MODE;
 }
 
 /**
@@ -19,16 +28,6 @@ void stack_mode(stack_t **stack)
  * @stack: Double pointer to the head of the stack.
  */
 void queue_mode(stack_t **stack)
-{
-	(void)stack;
-	mode = QUEUE_MODE;
-}
-
-/**
- * comments - Handles comments in the Monty file.
- * @stack: Double pointer to the head of the stack.
- */
-void comments(stack_t **stack)
 {
 	(void)stack;
 }
@@ -62,7 +61,7 @@ int is_integer(char *str)
 }
 
 /**
- * free_stack - Frees a stack.
+ * free_stack_t - Frees a stack.
  * @stack: The stack to free.
  */
 void free_stack_t(stack_t *stack)
@@ -95,27 +94,3 @@ size_t stack_len(stack_t *stack)
 
 	return (len);
 }
-
-/**
- * create_node - Creates a new stack node.
- * @value: The value to store in the new node.
- *
- * Return: A pointer to the newly created node.
- */
-stack_t *create_node(int value)
-{
-	stack_t *new_node = malloc(sizeof(stack_t));
-
-	if (new_node == NULL)
-	{
-		fprintf(stderr, "Error: malloc failed\n");
-		exit(EXIT_FAILURE);
-	}
-
-	new_node->n = value;
-	new_node->prev = NULL;
-	new_node->next = NULL;
-
-	return (new_node);
-}
-

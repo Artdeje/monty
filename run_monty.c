@@ -109,7 +109,7 @@ void (*get_op_func(char *opcode))(stack_t**, unsigned int)
  *
  * Return: EXIT_SUCCESS on success, respective error code on failure.
  */
-int run_monty(FILE *script_fd)
+int run_monty(FILE *script_fd, char **op_toks)
 {
 	stack_t *stack = NULL;
 	char *line = NULL;

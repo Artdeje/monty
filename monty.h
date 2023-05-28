@@ -9,9 +9,6 @@
 #define QUEUE_MODE 1
 #define DELIMS " \n\t\a\b"
 
-/* GLOBAL OPCODE TOKENS */
-extern char **op_toks;
-
 /**
  * struct stack_s - doubly linked list representation of a stack (or queue)
  * @n: integer
@@ -46,14 +43,14 @@ typedef struct instruction_s
 void free_stack_t(stack_t *stack);
 int init_stack(stack_t **stack);
 int check_mode(stack_t *stack);
-void free_tokens(void);
-unsigned int token_arr_len(void);
-int run_monty(FILE *script_fd);
-void set_op_tok_error(int error_code);
+void free_tokens(char **op_toks);
+unsigned int token_arr_len(char **op_toks);
+int run_monty(FILE *script_fd, char **op_toks);
+void set_op_tok_error(int error_code, char **op_toks);
 int isdigit(int c);
 
 /* OPCODE FUNCTIONS */
-void monty_push(stack_t **stack, unsigned int line_number);
+void monty_push(stack_t **stack, unsigned int line_number, char **op_toks);
 void monty_pall(stack_t **stack, unsigned int line_number);
 void monty_pint(stack_t **stack, unsigned int line_number);
 void monty_pop(stack_t **stack, unsigned int line_number);
